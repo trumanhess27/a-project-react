@@ -77,6 +77,7 @@ export type Database = {
           due: string | null
           id: number
           list_id: number | null
+          order: number | null
           status: boolean | null
           title: string | null
         }
@@ -86,6 +87,7 @@ export type Database = {
           due?: string | null
           id?: number
           list_id?: number | null
+          order?: number | null
           status?: boolean | null
           title?: string | null
         }
@@ -95,6 +97,7 @@ export type Database = {
           due?: string | null
           id?: number
           list_id?: number | null
+          order?: number | null
           status?: boolean | null
           title?: string | null
         }
