@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { updateTask, deleteTask } from '../lib/TaskApi'
 
-export default function Card({ task, lists, onUpdate, onDelete }) {
+export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDelete, onReorder }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || '')
@@ -193,11 +193,30 @@ export default function Card({ task, lists, onUpdate, onDelete }) {
                   >
                     Edit
                   </button>
-                  
+
+                  {taskCount > 1 && (
+                    <div>
+                      <button
+                        onClick={() => { setShowMenu(false); onReorder('up') }}
+                        disabled={taskIndex === 0}
+                        className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 mb-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      >
+                        Move up
+                      </button>
+                      <button
+                        onClick={() => { setShowMenu(false); onReorder('down') }}
+                        disabled={taskIndex === taskCount - 1}
+                        className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 mb-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      >
+                        Move down
+                      </button>
+                    </div>
+                  )}
+
                   {lists?.filter((l) => String(l.id) !== String(task.list_id)).length > 0 && (
                     <div className="border-y border-gray-100 mb-1 py-1 px-3">
                       <p className="text-sm text-emerald-900 font-semibold mb-1">
-                        Move to
+                        Move to list
                       </p>
                       {lists
                         .filter((l) => String(l.id) !== String(task.list_id))

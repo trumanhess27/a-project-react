@@ -3,7 +3,7 @@ import { updateList, deleteList } from '../lib/ListApi'
 import { createTask } from '../lib/TaskApi'
 import Card from './Card'
 
-export default function List({ list, tasks, allLists, onListUpdate, onListDelete, onTaskCreate, onTaskUpdate, onTaskDelete }) {
+export default function List({ list, tasks, allLists, onListUpdate, onListDelete, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskReorder }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [title, setTitle] = useState(list.title)
   const [isAddingCard, setIsAddingCard] = useState(false)
@@ -150,13 +150,21 @@ export default function List({ list, tasks, allLists, onListUpdate, onListDelete
 
       {/* cards (scrollable) */}
       <div className="flex-1 overflow-y-auto px-2 pb-1" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <Card
             key={task.id}
             task={task}
+            taskIndex={index}
+            taskCount={tasks.length}
             lists={allLists}
             onUpdate={onTaskUpdate}
             onDelete={onTaskDelete}
+            onReorder={(direction) => {
+              const newTasks = [...tasks];
+              const swapIndex = direction === 'up' ? index - 1 : index + 1;
+              [newTasks[index], newTasks[swapIndex]] = [newTasks[swapIndex], newTasks[index]];
+              onTaskReorder(list.id, newTasks)
+            }}
           />
         ))}
       </div>

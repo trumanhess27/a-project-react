@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { initBoard } from '../lib/BoardApi'
 import { getLists, createList } from '../lib/ListApi'
-import { getTasksByBoard } from '../lib/TaskApi'
+import { getTasksByBoard, reorderTasks } from '../lib/TaskApi'
 import List from '../components/List'
 
 export default function Board() {
@@ -83,6 +83,17 @@ export default function Board() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId))
   }
 
+  // Task reorder callback
+  async function handleTaskReorder(listId, reorderedTasks) {
+    setTasks(prev => {
+      const otherTasks = prev.filter(t => t.list_id !== listId)
+      return [...otherTasks, ...reorderedTasks]
+    })
+
+    // persist order
+    await reorderTasks(reorderedTasks.map((t, i) => ({ id: t.id, order: i })))
+  }
+
   // Loading Screen
   if (loading) {
     return (
@@ -135,6 +146,7 @@ export default function Board() {
                 onTaskCreate={handleTaskCreate}
                 onTaskUpdate={handleTaskUpdate}
                 onTaskDelete={handleTaskDelete}
+                onTaskReorder={handleTaskReorder}
               />
             )
           })}
