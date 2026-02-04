@@ -130,16 +130,16 @@ export default function List({ list, tasks, allLists, onListUpdate, onListDelete
             </svg>
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-7 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-40 py-1">
+            <div className="absolute right-0 top-7 z-20 bg-white border border-gray-200 rounded-lg px-2 py-2 shadow-lg w-40 py-1">
               <button
                 onClick={() => { setShowMenu(false); setIsEditingTitle(true) }}
-                className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 hover:bg-gray-100 transition-colors"
+                className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 mb-1 rounded hover:bg-gray-100 transition-colors"
               >
                 Rename
               </button>
               <button
                 onClick={handleDeleteList}
-                className="block w-full text-left text-sm text-red-600 px-3 py-1.5 hover:bg-red-50 transition-colors"
+                className="block w-full text-left text-sm text-red-600 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
               >
                 Delete list
               </button>
