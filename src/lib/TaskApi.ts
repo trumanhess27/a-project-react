@@ -41,7 +41,7 @@ export async function createTask(listId: number, title: string): Promise<Task> {
   
   const { data, error } = await supabase
     .from('task')
-    .insert({ list_id: listId, title, status: false })
+    .insert({ list_id: listId, title, status: false, order: newOrder })
     .select()
     .single()
 
