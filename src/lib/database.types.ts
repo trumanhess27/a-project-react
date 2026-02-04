@@ -82,6 +82,7 @@ export type Database = {
           list_id: number | null
           order: number | null
           status: boolean | null
+          story_points: number | null
           title: string | null
         }
         Insert: {
@@ -92,6 +93,7 @@ export type Database = {
           list_id?: number | null
           order?: number | null
           status?: boolean | null
+          story_points?: number | null
           title?: string | null
         }
         Update: {
@@ -102,6 +104,7 @@ export type Database = {
           list_id?: number | null
           order?: number | null
           status?: boolean | null
+          story_points?: number | null
           title?: string | null
         }
         Relationships: [

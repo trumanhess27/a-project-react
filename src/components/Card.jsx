@@ -8,6 +8,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || '')
   const [dueDate, setDueDate] = useState(task.due ? new Date(task.due) : null)
+  const [storyPoints, setStoryPoints] = useState(task.story_points ?? null)
   const [showMenu, setShowMenu] = useState(false)
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
   const cardEditRef = useRef(null)
@@ -20,7 +21,8 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
     setTitle(task.title)
     setDescription(task.description || '')
     setDueDate(task.due ? new Date(task.due) : null)
-  }, [task.title, task.description, task.due])
+    setStoryPoints(task.story_points ?? null)
+  }, [task.title, task.description, task.due, task.story_points])
 
   // close dropdown menu on outside click
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
   async function handleSave() {
     setIsEditing(false)
     const due = dueDate ? dueDate.toISOString().split('T')[0] : null
-    const updates = { title, description, due }
+    const updates = { title, description, due, story_points: storyPoints }
     try {
       await updateTask(task.id, updates)
       onUpdate({ ...task, ...updates })
@@ -62,6 +64,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
       setTitle(task.title)
       setDescription(task.description || '')
       setDueDate(task.due ? new Date(task.due) : null)
+      setStoryPoints(task.story_points ?? null)
     }
   }
 
@@ -114,6 +117,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
                 setTitle(task.title)
                 setDescription(task.description || '')
                 setDueDate(task.due ? new Date(task.due) : null)
+                setStoryPoints(task.story_points ?? null)
                 setIsEditing(false)
               }
             }}
@@ -129,6 +133,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
                 setTitle(task.title)
                 setDescription(task.description || '')
                 setDueDate(task.due ? new Date(task.due) : null)
+                setStoryPoints(task.story_points ?? null)
                 setIsEditing(false)
               }
             }}
@@ -144,6 +149,19 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
             dateFormat="MMM d, yyyy"
             className="w-full text-xs text-gray-600 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2"
           />
+          <select
+            value={storyPoints ?? ''}
+            onChange={(e) => setStoryPoints(e.target.value === '' ? null : Number(e.target.value))}
+            className="w-full text-xs text-gray-600 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2 bg-white"
+          >
+            <option value="">Story points</option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={5}>5</option>
+            <option value={8}>8</option>
+            <option value={13}>13</option>
+          </select>
           <div className="flex gap-2">
             <button
               onClick={handleSave}
@@ -156,6 +174,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
                 setTitle(task.title)
                 setDescription(task.description || '')
                 setDueDate(task.due ? new Date(task.due) : null)
+                setStoryPoints(task.story_points ?? null)
                 setIsEditing(false)
               }}
               className="text-xs text-gray-500 px-3 py-1 rounded hover:text-gray-700 transition-colors"
@@ -269,9 +288,18 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
             </p>
           )}
 
-          {/* due date */}
-          {task.due && (
-            <p className={`text-sm ${task.status ? 'line-through text-gray-400' : 'text-gray-500'}`}>Due: {task.due}</p>
+          {/* due date + story points row */}
+          {(task.due || task.story_points != null) && (
+            <div className="flex items-center justify-between mt-1">
+              {task.due && (
+                <p className={`text-xs ${task.status ? 'line-through text-gray-400' : 'text-gray-500'}`}>Due: {task.due}</p>
+              )}
+              {task.story_points != null && (
+                <span className={`ml-auto text-xs font-semibold px-2 py-0.5 rounded-full ${task.status ? 'bg-gray-100 text-gray-400' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {task.story_points}
+                </span>
+              )}
+            </div>
           )}
 
         </>
