@@ -142,7 +142,7 @@ export default function Board() {
       <main className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4">
         <div className="flex gap-3 h-full items-start">
           {lists.map((list, index) => {
-            const listTasks = tasks.filter((t) => t.list_id === list.id)
+            const listTasks = tasks.filter((t) => t.list_id === list.id).sort((a, b) => a.order - b.order)
             return (
               <List
                 key={list.id}

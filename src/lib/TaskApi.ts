@@ -73,6 +73,31 @@ export async function deleteTask(taskId: number): Promise<void> {
 }
 
 /**
+ * Move a task to a different list, placing it at the end
+ */
+export async function moveTask(taskId: number, newListId: number): Promise<Task> {
+  // find the current max order in the destination list
+  const { data: maxRow } = await supabase
+    .from('task')
+    .select('order')
+    .eq('list_id', newListId)
+    .order('order', { ascending: false })
+    .limit(1)
+
+  const newOrder = maxRow?.length ? maxRow[0].order + 1 : 0
+
+  const { data, error } = await supabase
+    .from('task')
+    .update({ list_id: newListId, order: newOrder })
+    .eq('id', taskId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Task
+}
+
+/**
  * Reorder all tasks
  */
 export async function reorderTasks(tasks: { id: number; order: number }[]): Promise<void> {

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { updateTask, deleteTask } from '../lib/TaskApi'
+import { updateTask, deleteTask, moveTask } from '../lib/TaskApi'
 
 export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDelete, onReorder }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -80,8 +80,8 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
     setShowMenu(false)
     if (String(newListId) === String(task.list_id)) return
     try {
-      await updateTask(task.id, { list_id: Number(newListId) })
-      onUpdate({ ...task, list_id: Number(newListId) })
+      const moved = await moveTask(task.id, Number(newListId))
+      onUpdate(moved)
     } catch (e) {
       console.error('Failed to move task', e)
     }
