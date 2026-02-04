@@ -14,10 +14,7 @@ export async function initBoard(): Promise<Board> {
   if (boards && boards.length > 0) return boards[0] as Board
 
   // if no boards exist then create one
-  const { data, error } = await createBoard('Default', 'Track Items')
-
-  if (error) throw error
-  return data as Board
+  return await createBoard('Default', 'Track Items')
 }
 
 
@@ -27,7 +24,7 @@ export async function initBoard(): Promise<Board> {
 export async function createBoard(title, description): Promise<Board> {
   const { data, error } = await supabase
     .from('board')
-    .insert({ board_id: boardId, title })
+    .insert({ title, description })
     .select()
     .single()
 
