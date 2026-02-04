@@ -14,6 +14,24 @@ html, body {
 }
 
 
+/* --------------- mobile snap-scroll styles --------------- */
+@media (max-width: 767px) {
+  /* enable horizontal snap-scrolling on the list container */
+  main {
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1rem;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* each list column and the "Add list" column: fill the viewport width
+     so exactly one list is visible per snap position, and become a snap target */
+  main > div > div {
+    width: calc(100vw - 2rem) !important; /* full width minus main's left+right padding */
+    scroll-snap-align: start;
+  }
+}
+
 /* --------------- print styles --------------- */
 @media print {
 
