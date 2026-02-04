@@ -1,0 +1,184 @@
+import { useState, useEffect, useRef } from 'react'
+import { initBoard } from '../lib/BoardApi'
+import { getLists, createList } from '../lib/ListApi'
+import { getTasksByBoard } from '../lib/TaskApi'
+import List from '../components/List'
+
+export default function Board() {
+  const [board, setBoard] = useState(null)
+  const [lists, setLists] = useState([])
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [isAddingList, setIsAddingList] = useState(false)
+  const [newListTitle, setNewListTitle] = useState('')
+  const newListRef = useRef(null)
+
+  // initial load of application, loads first board in database or creates a new one if none exist
+  useEffect(() => {
+    async function init() {
+      try {
+        const b = await initBoard()
+        setBoard(b)
+        const [l, t] = await Promise.all([getLists(b.id), getTasksByBoard(b.id)])
+        setLists(l)
+        setTasks(t)
+      } catch (e) {
+        console.error('Board init failed', e)
+        setError('Failed to load board.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    init()
+  }, [])
+
+  // close add new list element on outside click
+  useEffect(() => {
+    function handler(e) {
+      if (newListRef.current && !newListRef.current.contains(e.target)) {
+        setIsAddingList(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // List add callback
+  async function handleAddList() {
+    if (!newListTitle.trim()) return
+    try {
+      const list = await createList(board.id, newListTitle.trim())
+      setLists((prev) => [...prev, list])
+      setNewListTitle('')
+      setIsAddingList(false)
+    } catch (e) {
+      console.error('Failed to create list', e)
+    }
+  }
+
+  // List update callback
+  function handleListUpdate(updated) {
+    setLists((prev) => prev.map((l) => (l.id === updated.id ? updated : l)))
+  }
+
+  // List delete callback
+  function handleListDelete(listId) {
+    setLists((prev) => prev.filter((l) => l.id !== listId))
+    setTasks((prev) => prev.filter((t) => t.list_id !== listId))
+  }
+
+  // Task create callback
+  function handleTaskCreate(task) {
+    setTasks((prev) => [...prev, task])
+  }
+
+  // Task update callback
+  function handleTaskUpdate(updated) {
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+  }
+
+  // Task delete callback
+  function handleTaskDelete(taskId) {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId))
+  }
+
+  // Loading Screen
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-emerald-900">
+        <p className="text-white text-lg animate-pulse">Loading board…</p>
+      </div>
+    )
+  }
+
+  // Error Screen
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-emerald-900">
+        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+          <h2 className="text-lg font-bold text-red-600 mb-2">Error</h2>
+          <p className="text-gray-600 text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-emerald-950">
+      {/* navigation bar, displays current board and lets users create a new board or switch between boards */}
+      <header className="flex-shrink-0 flex items-center justify-between px-5 py-3 bg-emerald-800 shadow-sm">
+        <div>
+          <h1 className="text-white text-lg font-bold tracking-tight">{board?.title}</h1>
+          {board?.description && (
+            <p className="text-emerald-200 text-xs mt-0.5">{board.description}</p>
+          )}
+        </div>
+        <span className="text-emerald-300 text-xs">
+          <button className="text-emerald-300 text-md font-medium py-2 px-3 rounded-full bg-emerald-900 hover:shadow-sm hover:bg-emerald-500 hover:text-emerald-950 transition-colors">Create New Board</button>
+        </span>
+      </header>
+
+      {/* horizontal scrolling list area */}
+      <main className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4">
+        <div className="flex gap-3 h-full items-start">
+          {lists.map((list) => {
+            const listTasks = tasks.filter((t) => t.list_id === list.id)
+            return (
+              <List
+                key={list.id}
+                list={list}
+                tasks={listTasks}
+                allLists={lists}
+                onListUpdate={handleListUpdate}
+                onListDelete={handleListDelete}
+                onTaskCreate={handleTaskCreate}
+                onTaskUpdate={handleTaskUpdate}
+                onTaskDelete={handleTaskDelete}
+              />
+            )
+          })}
+
+          {/* add list column */}
+          <div className="flex-shrink-0 w-72">
+            {isAddingList ? (
+              <div ref={newListRef} className="bg-white rounded-xl shadow-sm p-3">
+                <input
+                  value={newListTitle}
+                  onChange={(e) => setNewListTitle(e.target.value)}
+                  placeholder="List name"
+                  className="w-full text-sm font-semibold text-gray-700 border border-emerald-400 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddList}
+                    className="text-xs bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700"
+                  >
+                    Add list
+                  </button>
+                  <button
+                    onClick={() => { setNewListTitle(''); setIsAddingList(false) }}
+                    className="text-xs text-gray-500 px-3 py-1 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAddingList(true)}
+                className="w-full text-left text-emerald-300 hover:text-white bg-emerald-900 hover:bg-emerald-800 rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-2 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="8" y1="3" x2="8" y2="13" />
+                  <line x1="3" y1="8" x2="13" y2="8" />
+                </svg>
+                Add list
+              </button>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
