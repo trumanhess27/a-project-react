@@ -12,3 +12,130 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
+/* --------------- print styles --------------- */
+@media print {
+
+
+  /* remove colored backgrounds on html/body and the board wrapper */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    height: auto !important;
+  }
+
+  /* hide the entire header */
+  header {
+    display: none !important;
+  }
+
+  /* board root: remove dark bg, drop fixed viewport height, stack vertically */
+  .h-screen {
+    height: auto !important;
+    min-height: unset !important;
+  }
+  .bg-emerald-950,
+  .bg-emerald-900,
+  .bg-emerald-800 {
+    background-color: #fff !important;
+  }
+
+  /* lists container: switch from horizontal flex row to vertical column */
+  main {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  main > div {
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+    height: auto !important;
+  }
+
+  /* each list column: full width, no background, no rounded corners */
+  main > div > div {
+    width: 100% !important;
+    flex-shrink: unset !important;
+    background-color: #fff !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.75rem;
+  }
+
+  /* list title: plain black, remove hover / cursor styles */
+  main h2 {
+    color: #000 !important;
+    cursor: default !important;
+  }
+
+  /* scrollable card area: remove overflow clipping and fixed max-height */
+  main .overflow-y-auto {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* cards: white bg, no shadow, no rounded corners, full width */
+  main .bg-white {
+    background-color: #fff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* card text: force black, remove line-through on completed tasks */
+  main p, main h2 {
+    color: #000 !important;
+  }
+
+  /* checkbox: standard appearance, no accent color */
+  input[type="checkbox"] {
+    accent-color: #000 !important;
+  }
+
+  /* hide all interactive / context-menu elements:
+     - "..." menu buttons (list & card)
+     - "Add a card" button
+     - "Add list" column (last child of the lists flex container)
+     - any dropdowns that may be open
+  */
+  button[aria-label="List options"],
+  button[aria-label="Card options"] {
+    display: none !important;
+  }
+
+  /* "Add a card" area is the last child div inside each list column */
+  main > div > div > div:last-child {
+    display: none !important;
+  }
+
+  /* the "Add list" column is the last direct child of the lists flex row */
+  main > div > div:last-child {
+    display: none !important;
+  }
+
+  /* hide any open dropdown / popover menus */
+  .absolute, .fixed {
+    display: none !important;
+  }
+
+  /* remove all emerald / colored text, keep everything black */
+  .text-emerald-600,
+  .text-emerald-700,
+  .text-emerald-200,
+  .text-emerald-300,
+  .text-emerald-900,
+  .text-red-600 {
+    color: #000 !important;
+  }
+
+  /* hide completed-task strikethrough and gray wash */
+  .line-through {
+    text-decoration: none !important;
+  }
+  .text-gray-400 {
+    color: #374151 !important;
+  }
+  .text-gray-500 {
+    color: #374151 !important;
+  }
+}
