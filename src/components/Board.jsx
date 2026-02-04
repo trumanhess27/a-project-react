@@ -146,6 +146,16 @@ export default function Board() {
                 <input
                   value={newListTitle}
                   onChange={(e) => setNewListTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleAddList()
+                    }
+                    if (e.key === 'Escape') {
+                      setNewListTitle('')
+                      setIsAddingList(false)
+                    }
+                  }}
                   placeholder="List name"
                   className="w-full text-sm font-semibold text-gray-700 border border-emerald-400 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2"
                 />
