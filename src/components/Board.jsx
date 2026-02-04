@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { initBoard, getAllBoards } from '../lib/BoardApi'
-import { getLists, createList, reorderLists } from '../lib/ListApi'
+import { getLists, createList, reorderLists, migrateList } from '../lib/ListApi'
 import { getTasksByBoard, reorderTasks } from '../lib/TaskApi'
 import List from '../components/List'
 import Header from '../components/Header'
@@ -98,6 +98,17 @@ export default function Board() {
     await reorderLists(reorderedLists.map((l, i) => ({ id: l.id, order: i })))
   }
 
+  // List migrate callback, removes the list and its tasks from current board as well
+  async function handleListMigrate(listId, targetBoardId) {
+    try {
+      await migrateList(listId, targetBoardId)
+      setLists((prev) => prev.filter((l) => l.id !== listId))
+      setTasks((prev) => prev.filter((t) => t.list_id !== listId))
+    } catch (e) {
+      console.error('Failed to migrate list', e)
+    }
+  }
+
   // Task create callback
   function handleTaskCreate(task) {
     setTasks((prev) => [...prev, task])
@@ -168,11 +179,14 @@ export default function Board() {
                 list={list}
                 tasks={listTasks}
                 allLists={lists}
+                boards={boards}
+                activeBoard={board}
                 listIndex={index}
                 listCount={lists.length}
                 onListUpdate={handleListUpdate}
                 onListDelete={handleListDelete}
                 onListReorder={handleListReorder}
+                onListMigrate={handleListMigrate}
                 onTaskCreate={handleTaskCreate}
                 onTaskUpdate={handleTaskUpdate}
                 onTaskDelete={handleTaskDelete}

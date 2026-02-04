@@ -3,7 +3,7 @@ import { updateList, deleteList } from '../lib/ListApi'
 import { createTask } from '../lib/TaskApi'
 import Card from './Card'
 
-export default function List({ list, tasks, allLists, listIndex, listCount, onListUpdate, onListDelete, onListReorder, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskReorder }) {
+export default function List({ list, tasks, allLists, boards, activeBoard, listIndex, listCount, onListUpdate, onListDelete, onListReorder, onListMigrate, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskReorder }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [title, setTitle] = useState(list.title)
   const [isAddingCard, setIsAddingCard] = useState(false)
@@ -81,6 +81,11 @@ export default function List({ list, tasks, allLists, listIndex, listCount, onLi
     const newLists = [...allLists];
     [newLists[listIndex], newLists[swapIndex]] = [newLists[swapIndex], newLists[listIndex]]
     onListReorder(newLists)
+  }
+
+  async function handleMigrateList(targetBoardId) {
+    setShowMenu(false)
+    onListMigrate(list.id, targetBoardId)
   }
 
   async function handleAddCard() {
@@ -161,6 +166,25 @@ export default function List({ list, tasks, allLists, listIndex, listCount, onLi
                   >
                     Move right
                   </button>
+                </div>
+              )}
+
+              {boards?.filter((b) => b.id !== activeBoard?.id).length > 0 && (
+                <div className="border-y border-gray-100 my-1 py-1 px-3">
+                  <p className="text-sm text-emerald-900 font-semibold mb-1">
+                    Move to board
+                  </p>
+                  {boards
+                    .filter((b) => b.id !== activeBoard?.id)
+                    .map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => handleMigrateList(b.id)}
+                        className="block w-full text-left text-sm text-gray-700 px-1 py-1 rounded hover:bg-gray-100 transition-colors"
+                      >
+                        {b.title}
+                      </button>
+                    ))}
                 </div>
               )}
 

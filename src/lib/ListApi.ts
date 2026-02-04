@@ -74,3 +74,28 @@ export async function reorderLists(lists: { id: number; order: number }[]): Prom
 
   if (error) throw error
 }
+
+/**
+ * Migrate a list and all the tasks associated with it to another board
+ */
+export async function migrateList(listId: number, targetBoardId: number): Promise<List> {
+  // find the current max order on the destination board
+  const { data: maxRow } = await supabase
+    .from('list')
+    .select('order')
+    .eq('board_id', targetBoardId)
+    .order('order', { ascending: false })
+    .limit(1)
+
+  const newOrder = maxRow?.length ? maxRow[0].order + 1 : 0
+
+  const { data, error } = await supabase
+    .from('list')
+    .update({ board_id: targetBoardId, order: newOrder })
+    .eq('id', listId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as List
+}
