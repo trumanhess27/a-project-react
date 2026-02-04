@@ -109,6 +109,7 @@ export default function List({ list, tasks, allLists, boards, activeBoard, listI
             ref={titleRef}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleTitleSave}
             onKeyDown={(e) => {
               if (e.key === 'Enter') { e.preventDefault(); handleTitleSave() }
               if (e.key === 'Escape') { setTitle(list.title); setIsEditingTitle(false); }
