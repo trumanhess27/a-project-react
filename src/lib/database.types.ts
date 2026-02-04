@@ -44,6 +44,7 @@ export type Database = {
           color: string | null
           created_at: string
           id: number
+          order: number | null
           title: string | null
         }
         Insert: {
@@ -51,6 +52,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: number
+          order?: number | null
           title?: string | null
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: number
+          order?: number | null
           title?: string | null
         }
         Relationships: [

@@ -8,7 +8,7 @@ export async function getLists(boardId: number): Promise<List[]> {
     .from('list')
     .select('*')
     .eq('board_id', boardId)
-    .order('id', { ascending: true })
+    .order('order', { ascending: true })
 
   if (error) throw error
   return data as List[]
@@ -18,9 +18,19 @@ export async function getLists(boardId: number): Promise<List[]> {
  * Create a list
  */
 export async function createList(boardId: number, title: string): Promise<List> {
+  // get order from max existing order on this board + 1, or 0 if empty
+  const { data: maxRow } = await supabase
+    .from('list')
+    .select('order')
+    .eq('board_id', boardId)
+    .order('order', { ascending: false })
+    .limit(1)
+
+  const newOrder = maxRow?.length ? maxRow[0].order + 1 : 0
+
   const { data, error } = await supabase
     .from('list')
-    .insert({ board_id: boardId, title })
+    .insert({ board_id: boardId, title, order: newOrder })
     .select()
     .single()
 
@@ -51,5 +61,16 @@ export async function deleteList(listId: number): Promise<void> {
   await supabase.from('task').delete().eq('list_id', listId)
 
   const { error } = await supabase.from('list').delete().eq('id', listId)
+  if (error) throw error
+}
+
+/**
+ * Persist a new list order when triggered
+ */
+export async function reorderLists(lists: { id: number; order: number }[]): Promise<void> {
+  const { error } = await supabase
+    .from('list')
+    .upsert(lists, { onConflict: 'id' })
+
   if (error) throw error
 }

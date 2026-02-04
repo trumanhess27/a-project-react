@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { initBoard } from '../lib/BoardApi'
-import { getLists, createList } from '../lib/ListApi'
+import { getLists, createList, reorderLists } from '../lib/ListApi'
 import { getTasksByBoard, reorderTasks } from '../lib/TaskApi'
 import List from '../components/List'
 
@@ -68,6 +68,14 @@ export default function Board() {
     setTasks((prev) => prev.filter((t) => t.list_id !== listId))
   }
 
+  // List reorder callback
+  async function handleListReorder(reorderedLists) {
+    setLists(reorderedLists)
+
+    // persist order
+    await reorderLists(reorderedLists.map((l, i) => ({ id: l.id, order: i })))
+  }
+
   // Task create callback
   function handleTaskCreate(task) {
     setTasks((prev) => [...prev, task])
@@ -133,7 +141,7 @@ export default function Board() {
       {/* horizontal scrolling list area */}
       <main className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4">
         <div className="flex gap-3 h-full items-start">
-          {lists.map((list) => {
+          {lists.map((list, index) => {
             const listTasks = tasks.filter((t) => t.list_id === list.id)
             return (
               <List
@@ -141,8 +149,11 @@ export default function Board() {
                 list={list}
                 tasks={listTasks}
                 allLists={lists}
+                listIndex={index}
+                listCount={lists.length}
                 onListUpdate={handleListUpdate}
                 onListDelete={handleListDelete}
+                onListReorder={handleListReorder}
                 onTaskCreate={handleTaskCreate}
                 onTaskUpdate={handleTaskUpdate}
                 onTaskDelete={handleTaskDelete}

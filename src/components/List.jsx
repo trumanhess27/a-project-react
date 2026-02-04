@@ -3,7 +3,7 @@ import { updateList, deleteList } from '../lib/ListApi'
 import { createTask } from '../lib/TaskApi'
 import Card from './Card'
 
-export default function List({ list, tasks, allLists, onListUpdate, onListDelete, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskReorder }) {
+export default function List({ list, tasks, allLists, listIndex, listCount, onListUpdate, onListDelete, onListReorder, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskReorder }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [title, setTitle] = useState(list.title)
   const [isAddingCard, setIsAddingCard] = useState(false)
@@ -76,6 +76,13 @@ export default function List({ list, tasks, allLists, onListUpdate, onListDelete
     }
   }
 
+  function handleMoveList(direction) {
+    const swapIndex = direction === 'left' ? listIndex - 1 : listIndex + 1
+    const newLists = [...allLists];
+    [newLists[listIndex], newLists[swapIndex]] = [newLists[swapIndex], newLists[listIndex]]
+    onListReorder(newLists)
+  }
+
   async function handleAddCard() {
     if (!newCardTitle.trim()) return
     try {
@@ -137,9 +144,29 @@ export default function List({ list, tasks, allLists, onListUpdate, onListDelete
               >
                 Rename
               </button>
+
+              {listCount > 1 && (
+                <div>
+                  <button
+                    onClick={() => { setShowMenu(false); handleMoveList('left') }}
+                    disabled={listIndex === 0}
+                    className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 mb-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Move left
+                  </button>
+                  <button
+                    onClick={() => { setShowMenu(false); handleMoveList('right') }}
+                    disabled={listIndex === listCount - 1}
+                    className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 mb-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Move right
+                  </button>
+                </div>
+              )}
+
               <button
                 onClick={handleDeleteList}
-                className="block w-full text-left text-sm text-red-600 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
+                className="block w-full text-left text-sm text-red-600 px-3 py-1.5 mt-1 rounded hover:bg-red-50 transition-colors"
               >
                 Delete list
               </button>
