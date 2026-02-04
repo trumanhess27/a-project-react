@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import { updateTask, deleteTask } from '../lib/TaskApi'
 
 export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDelete, onReorder }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || '')
+  const [dueDate, setDueDate] = useState(task.due ? new Date(task.due) : null)
   const [showMenu, setShowMenu] = useState(false)
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
   const cardEditRef = useRef(null)
@@ -16,7 +19,8 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
   useEffect(() => {
     setTitle(task.title)
     setDescription(task.description || '')
-  }, [task.title, task.description])
+    setDueDate(task.due ? new Date(task.due) : null)
+  }, [task.title, task.description, task.due])
 
   // close dropdown menu on outside click
   useEffect(() => {
@@ -47,7 +51,8 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
 
   async function handleSave() {
     setIsEditing(false)
-    const updates = { title, description }
+    const due = dueDate ? dueDate.toISOString().split('T')[0] : null
+    const updates = { title, description, due }
     try {
       await updateTask(task.id, updates)
       onUpdate({ ...task, ...updates })
@@ -56,6 +61,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
       // revert changes
       setTitle(task.title)
       setDescription(task.description || '')
+      setDueDate(task.due ? new Date(task.due) : null)
     }
   }
 
@@ -107,6 +113,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
               if (e.key === 'Escape') {
                 setTitle(task.title)
                 setDescription(task.description || '')
+                setDueDate(task.due ? new Date(task.due) : null)
                 setIsEditing(false)
               }
             }}
@@ -121,12 +128,21 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
               if (e.key === 'Escape') {
                 setTitle(task.title)
                 setDescription(task.description || '')
+                setDueDate(task.due ? new Date(task.due) : null)
                 setIsEditing(false)
               }
             }}
             placeholder="Add a description"
             className="w-full text-xs text-gray-600 border border-gray-300 rounded px-2 py-1 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2"
             rows={3}
+          />
+          <DatePicker
+            selected={dueDate}
+            onChange={(date) => setDueDate(date)}
+            placeholderText="Set a due date"
+            isClearable
+            dateFormat="MMM d, yyyy"
+            className="w-full text-xs text-gray-600 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-300 mb-2"
           />
           <div className="flex gap-2">
             <button
@@ -139,6 +155,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
               onClick={() => {
                 setTitle(task.title)
                 setDescription(task.description || '')
+                setDueDate(task.due ? new Date(task.due) : null)
                 setIsEditing(false)
               }}
               className="text-xs text-gray-500 px-3 py-1 rounded hover:text-gray-700 transition-colors"
@@ -254,7 +271,7 @@ export default function Card({ task, taskIndex, taskCount, lists, onUpdate, onDe
 
           {/* due date */}
           {task.due && (
-            <p className="text-xs text-gray-400 mt-2">{task.due}</p>
+            <p className={`text-sm ${task.status ? 'line-through text-gray-400' : 'text-gray-500'}`}>Due: {task.due}</p>
           )}
 
         </>
