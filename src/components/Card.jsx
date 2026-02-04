@@ -186,30 +186,32 @@ export default function Card({ task, lists, onUpdate, onDelete }) {
               </button>
               {/* card context menu */}
               {showMenu && (
-                <div className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg w-44 py-1 px-3" style={{ top: menuPos.top, right: menuPos.right }}>
+                <div className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg w-44 py-2 px-2" style={{ top: menuPos.top, right: menuPos.right }}>
                   <button
                     onClick={() => { setShowMenu(false); setIsEditing(true) }}
-                    className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 rounded hover:bg-gray-100 transition-colors"
+                    className="block w-full text-left text-sm text-gray-700 mb-1 px-3 py-1.5 rounded hover:bg-gray-100 transition-colors"
                   >
                     Edit
                   </button>
-
-                  <div className="border-y border-gray-100 my-1 py-1 px-3">
-                    <p className="text-sm text-emerald-900 font-semibold tracking-wide mb-1">
-                      Move to
-                    </p>
-                    {lists
-                      .filter((l) => String(l.id) !== String(task.list_id))
-                      .map((l) => (
-                        <button
-                          key={l.id}
-                          onClick={() => handleMove(l.id)}
-                          className="block w-full text-left text-sm text-gray-700 px-1 py-1 rounded hover:bg-gray-100 transition-colors"
-                        >
-                          {l.title}
-                        </button>
-                      ))}
-                  </div>
+                  
+                  {lists?.filter((l) => String(l.id) !== String(task.list_id)).length > 0 && (
+                    <div className="border-y border-gray-100 mb-1 py-1 px-3">
+                      <p className="text-sm text-emerald-900 font-semibold mb-1">
+                        Move to
+                      </p>
+                      {lists
+                        .filter((l) => String(l.id) !== String(task.list_id))
+                        .map((l) => (
+                          <button
+                            key={l.id}
+                            onClick={() => handleMove(l.id)}
+                            className="block w-full text-left text-sm text-gray-700 px-1 py-1 rounded hover:bg-gray-100 transition-colors"
+                          >
+                            {l.title}
+                          </button>
+                        ))}
+                    </div>
+                  )}
 
                   <div>
                     <button
