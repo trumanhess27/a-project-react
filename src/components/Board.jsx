@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { initBoard } from '../lib/BoardApi'
+import { initBoard, getAllBoards } from '../lib/BoardApi'
 import { getLists, createList, reorderLists } from '../lib/ListApi'
 import { getTasksByBoard, reorderTasks } from '../lib/TaskApi'
 import List from '../components/List'
+import Header from '../components/Header'
 
 export default function Board() {
-  const [board, setBoard] = useState(null)
+  const [boards, setBoards] = useState([]) // all boards 
+  const [board, setBoard] = useState(null) // currently active board
   const [lists, setLists] = useState([])
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,12 +16,13 @@ export default function Board() {
   const [newListTitle, setNewListTitle] = useState('')
   const newListRef = useRef(null)
 
-  // initial load of application, loads first board in database or creates a new one if none exist
+  // initial load of application, loads a default board created from database if none exist
   useEffect(() => {
     async function init() {
       try {
-        const b = await initBoard()
+        const [b, all] = await Promise.all([initBoard(), getAllBoards()])
         setBoard(b)
+        setBoards(all.length ? all : [b])
         const [l, t] = await Promise.all([getLists(b.id), getTasksByBoard(b.id)])
         setLists(l)
         setTasks(t)
@@ -32,6 +35,25 @@ export default function Board() {
     }
     init()
   }, [])
+
+  // load a board, watches for change in board id
+  useEffect(() => {
+    if (!board) return
+    async function loadBoard() {
+      try {
+        setLoading(true)
+        const [l, t] = await Promise.all([getLists(board.id), getTasksByBoard(board.id)])
+        setLists(l)
+        setTasks(t)
+      } catch (e) {
+        console.error('Failed to load board data', e)
+        setError('Failed to load board.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadBoard()
+  }, [board?.id])
 
   // close add new list element on outside click
   useEffect(() => {
@@ -125,17 +147,14 @@ export default function Board() {
 
   return (
     <div className="h-screen flex flex-col bg-emerald-950">
-      {/* navigation bar, displays current board and lets users create a new board or switch between boards */}
-      <header className="flex-shrink-0 flex items-center justify-between px-5 py-3 bg-emerald-800 shadow-sm">
-        <div>
-          <h1 className="text-white text-lg font-bold tracking-tight">{board?.title}</h1>
-          {board?.description && (
-            <p className="text-emerald-200 text-xs mt-0.5">{board.description}</p>
-          )}
-        </div>
-        <span className="text-emerald-300 text-xs">
-          <button className="text-emerald-300 text-md font-medium py-2 px-3 rounded-full bg-emerald-900 hover:shadow-sm hover:bg-emerald-500 hover:text-emerald-950 transition-colors">Create New Board</button>
-        </span>
+      {/* navigation bar */}
+      <header className="flex-shrink-0 px-5 py-3 bg-emerald-800 shadow-sm">
+        <Header
+          boards={boards}
+          activeBoard={board}
+          onSwitch={setBoard}
+          onBoardsChange={setBoards}
+        />
       </header>
 
       {/* horizontal scrolling list area */}
